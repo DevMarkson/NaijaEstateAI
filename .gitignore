@@ -44,3 +44,12 @@ build/
 dist/
 wheelhouse/
 
+# Node / frontend
+node_modules/
+.next/
+frontend/.next/
+frontend/node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+

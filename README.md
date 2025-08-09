@@ -104,6 +104,30 @@ MODEL_VERSION=1.0.0
 ### Static Frontend
 Simple static HTML page is in `static/index.html` (served if you put behind a web server or mount). For local dev you can open it and point fetch calls to the API origin if different.
 
+## Next.js Frontend (Optional)
+
+A React/Next.js client lives in `frontend/`.
+
+Install & run (in separate shell):
+```bash
+cd frontend
+npm install   # or yarn / pnpm
+npm run dev
+```
+
+It defaults to calling `http://localhost:8000` for the API. Override:
+```bash
+export NEXT_PUBLIC_API_BASE="https://your-api-host"
+npm run dev
+```
+
+Production build:
+```bash
+npm run build && npm start
+```
+
+The page provides a form for predictions and a cURL snippet generator.
+
 ## Testing
 
 ```bash
