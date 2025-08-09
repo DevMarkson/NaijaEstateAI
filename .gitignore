@@ -1,2 +1,7 @@
 /models
 /artifacts
+# Ignore models and artifacts
+models/
+artifacts/
+*.joblib
+
