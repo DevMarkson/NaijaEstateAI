@@ -1,20 +1,51 @@
 {
+  "best": "RandomForest",
   "results": {
     "LinearRegression": {
-      "rmse": 834711571.4271766,
-      "mae": 148218229.56475294,
-      "r2": -53.46498125174479
+      "rmse": 2861826.0347433896,
+      "mae": 1329231.3547901392,
+      "r2": 0.5906143018758208,
+      "mape": 0.46839645677716346,
+      "cv": {
+        "rmse_mean": null,
+        "rmse_std": null,
+        "mae_mean": null,
+        "mae_std": null,
+        "r2_mean": null,
+        "r2_std": null,
+        "mape_mean": null,
+        "mape_std": null
+      }
     },
     "RandomForest": {
-      "rmse": 205225497.42805842,
-      "mae": 15175519.248487238,
-      "r2": -2.2923585417520167
-    },
-    "XGBoost": {
-      "rmse": 2513477891.1403937,
-      "mae": 49737936.91956587,
-      "r2": -492.8495123609479
+      "rmse": 2736020.1783661116,
+      "mae": 1246843.1155320115,
+      "r2": 0.6258163577194867,
+      "mape": 0.4134296471104704,
+      "cv": {
+        "rmse_mean": null,
+        "rmse_std": null,
+        "mae_mean": null,
+        "mae_std": null,
+        "r2_mean": null,
+        "r2_std": null,
+        "mape_mean": null,
+        "mape_std": null
+      }
     }
   },
-  "best": "RandomForest"
+  "baseline": {
+    "rmse": 3158010.590999381,
+    "mae": 1654918.8812785388,
+    "r2": 0.5014905787732838,
+    "mape": 0.7521174508192999
+  },
+  "rows": 7884,
+  "removed_outliers": 116,
+  "price_bounds": {
+    "min_kept": 100000,
+    "p99_kept": 36000000.0
+  },
+  "test_size": 0.25,
+  "target_transform": "log1p"
 }

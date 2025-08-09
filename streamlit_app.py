@@ -3,17 +3,7 @@ import json
 import joblib
 import pandas as pd
 import streamlit as st
-
-MODEL_PATH = os.path.join("models", "best_model.joblib")
-METRICS_PATH = os.path.join("artifacts", "metrics.json")
-DATA_PATH = "lagos-rent.csv"
-
-# Keep in sync with training features
-FEATURE_COLUMNS = [
-    "bedrooms", "bathrooms", "toilets",
-    "Serviced", "Newly Built", "Furnished",
-    "property_type", "City", "Neighborhood",
-]
+from config import BEST_MODEL_PATH, METRICS_PATH, DATA_PATH, FEATURE_COLUMNS
 
 PROPERTY_TYPES = [
     "Duplex", "Semi Detached", "Detached", "Apartment", "Flat",
@@ -24,13 +14,13 @@ PROPERTY_TYPES = [
 
 @st.cache_resource(show_spinner=False)
 def load_model():
-    if not os.path.exists(MODEL_PATH):
+    if not BEST_MODEL_PATH.exists():
         return None
-    return joblib.load(MODEL_PATH)
+    return joblib.load(BEST_MODEL_PATH)
 
 @st.cache_data(show_spinner=False)
 def load_metrics():
-    if not os.path.exists(METRICS_PATH):
+    if not METRICS_PATH.exists():
         return None
     with open(METRICS_PATH, "r") as f:
         return json.load(f)
@@ -38,9 +28,8 @@ def load_metrics():
 @st.cache_data(show_spinner=False)
 def load_data_peek(n=5000):
     try:
-        if os.path.exists(DATA_PATH):
+        if DATA_PATH.exists():
             df = pd.read_csv(DATA_PATH, nrows=n)
-            # Normalize columns (match training)
             df.columns = [c.strip() for c in df.columns]
             return df
     except Exception:
@@ -59,10 +48,17 @@ if metrics:
     with st.expander("Model metrics", expanded=False):
         best = metrics.get("best")
         st.write(f"Best model: {best}")
+        baseline = metrics.get("baseline")
+        if baseline:
+            st.markdown("**Baseline (Median per Neighborhood)**")
+            st.write({k: round(v,2) if isinstance(v,(int,float)) else v for k,v in baseline.items()})
+        st.markdown("**Models (Holdout + CV)**")
         st.json(metrics.get("results", {}))
+        if metrics.get("removed_outliers") is not None:
+            st.caption(f"Outliers removed: {metrics['removed_outliers']} • Target transform: {metrics.get('target_transform')}")
 
 if model is None:
-    st.error("No trained model found. Please run the training notebook to produce models/best_model.joblib.")
+    st.error("No trained model found. Run: python train.py --data lagos-rent.csv (or schedule training).")
     st.stop()
 
 st.subheader("Enter listing details")
@@ -79,22 +75,19 @@ with col2:
 with col3:
     toilets = st.number_input("Toilets", min_value=0, max_value=20, value=3, step=1)
     furnished = st.checkbox("Furnished", value=False)
-    neighborhood = st.text_input("Neighborhood", value="Lekki")
+    # Neighborhood dropdown populated from data if available
+    if df_peek is not None and 'Neighborhood' in df_peek.columns:
+        neighborhood_options = sorted([c for c in df_peek['Neighborhood'].dropna().astype(str).unique() if c.strip()])
+        default_nbhd = 'Lekki' if 'Lekki' in neighborhood_options else neighborhood_options[0] if neighborhood_options else 'Unknown'
+        neighborhood_choice = st.selectbox("Neighborhood", options=neighborhood_options + ["Other (custom)"] , index=(neighborhood_options.index('Lekki') if 'Lekki' in neighborhood_options else 0))
+        if neighborhood_choice == "Other (custom)":
+            neighborhood = st.text_input("Enter Custom Neighborhood", value="") or "Unknown"
+        else:
+            neighborhood = neighborhood_choice
+    else:
+        neighborhood = st.text_input("Neighborhood", value="Lekki")
 
-# Optional: quick-pick from data
-if df_peek is not None and {"City", "Neighborhood"}.issubset(set(df_peek.columns)):
-    with st.expander("Quick-pick from dataset (optional)"):
-        cities = sorted([c for c in df_peek["City"].dropna().astype(str).unique() if c and c.strip()][:1000])
-        nbhds = sorted([c for c in df_peek["Neighborhood"].dropna().astype(str).unique() if c and c.strip()][:1000])
-        c1, c2 = st.columns(2)
-        with c1:
-            pick_city = st.selectbox("Pick City", options=[city] + [c for c in cities if c != city])
-        with c2:
-            pick_nbhd = st.selectbox("Pick Neighborhood", options=[neighborhood] + [c for c in nbhds if c != neighborhood])
-        if st.button("Use quick-picks"):
-            city = pick_city
-            neighborhood = pick_nbhd
-            st.success("Applied selections.")
+# Removed separate quick-pick expander since Neighborhood now dropdown above.
 
 input_row = pd.DataFrame([{ 
     "bedrooms": bedrooms,
