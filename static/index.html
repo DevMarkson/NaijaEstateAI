@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NaijaEstateAI Quick Predict</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; max-width: 760px; }
+    fieldset { margin-bottom: 1rem; }
+    label { display:block; margin: .4rem 0 .2rem; }
+    input, select { width: 100%; padding: .4rem; }
+    button { padding:.6rem 1rem; cursor:pointer; }
+    #result { margin-top:1rem; font-weight:600; }
+    code { background:#f2f2f2; padding:2px 4px; }
+  </style>
+</head>
+<body>
+  <h1>NaijaEstateAI – Quick Predict</h1>
+  <p>Minimal static page calling the FastAPI <code>/predict</code> endpoint.</p>
+  <form id="predictForm">
+    <fieldset>
+      <legend>Listing Details</legend>
+      <label>Bedrooms <input type="number" name="bedrooms" value="3" min="0" max="20" required></label>
+      <label>Bathrooms <input type="number" name="bathrooms" value="3" min="0" max="20" required></label>
+      <label>Toilets <input type="number" name="toilets" value="4" min="0" max="25" required></label>
+      <label>Serviced <select name="Serviced"><option value="0">No</option><option value="1">Yes</option></select></label>
+      <label>Newly Built <select name="Newly_Built"><option value="0">No</option><option value="1">Yes</option></select></label>
+      <label>Furnished <select name="Furnished"><option value="0">No</option><option value="1">Yes</option></select></label>
+      <label>Property Type <input name="property_type" value="Apartment" required></label>
+      <label>City <input name="City" value="Lagos" required></label>
+      <label>Neighborhood <input name="Neighborhood" value="Lekki" required></label>
+    </fieldset>
+    <button type="submit">Predict</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    const form = document.getElementById('predictForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+      // Convert numeric fields
+      ['bedrooms','bathrooms','toilets','Serviced','Newly_Built','Furnished'].forEach(k=> payload[k]=Number(payload[k]));
+      const resp = await fetch('/predict', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      const out = document.getElementById('result');
+      if(!resp.ok){ out.textContent = 'Error: ' + resp.status; return; }
+      const data = await resp.json();
+      out.textContent = 'Estimated Rent: ₦' + data.rounded.toLocaleString();
+    });
+  </script>
+</body>
+</html>

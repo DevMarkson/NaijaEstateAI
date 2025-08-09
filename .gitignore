@@ -1,7 +1,46 @@
-/models
-/artifacts
-# Ignore models and artifacts
+# Project artifacts (models & generated metrics)
 models/
 artifacts/
 *.joblib
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.python-version
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+
+# Environment / secrets
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Selenium / drivers (if any)
+chromedriver*
+geckodriver*
+
+# Logs
+*.log
+
+# Dist / build
+build/
+dist/
+wheelhouse/
 

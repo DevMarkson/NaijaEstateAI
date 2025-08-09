@@ -1,0 +1,14 @@
+pandas
+numpy
+scikit-learn
+xgboost
+joblib
+streamlit
+beautifulsoup4
+selenium
+python-dateutil
+fastapi
+uvicorn
+prometheus-client
+python-dotenv
+pydantic-settings
