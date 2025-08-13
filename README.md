@@ -146,4 +146,4 @@ Target: annual rent price (₦) converted to numeric (price_ngn).
 Open an issue / PR with improvements (e.g., better feature extraction, additional data sources, or deployment scripts).
 
 ## License
-MIT (add LICENSE file if required).
+MIT License
