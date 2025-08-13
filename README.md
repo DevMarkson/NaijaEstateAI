@@ -6,14 +6,14 @@ Machine Learning–driven Real Estate Management System focused on the Nigerian 
 * Predicting likely annual rent (₦) from property attributes
 * Laying foundations for recommendation, trend analysis & geospatial insights
 
-## Features (Current)
+## Features
 * Training script (`train.py`) trains Linear Regression, RandomForest, optionally XGBoost and auto-selects the best (RMSE)
 * Persisted best model (`models/best_model.joblib`) + metrics JSON (`artifacts/metrics.json`)
 * Streamlit app (`streamlit_app.py`) for interactive rent prediction
 * Config centralization (`config.py`) keeping features & paths consistent
 * Basic test (`tests/test_training.py`) to ensure training produces artifacts
 
-## Roadmap (Planned)
+## Roadmap
 1. Property recommendation engine (content + hybrid)
 2. Market trend time-series module (price evolution by location)
 3. Geospatial enrichment (lat/long, distance to POIs, clustering)
@@ -25,7 +25,7 @@ Machine Learning–driven Real Estate Management System focused on the Nigerian 
 
 ## Setup
 
-Install dependencies (ideally in a virtual environment):
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -73,9 +73,9 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 Swagger UI: http://127.0.0.1:8000/docs
 
-Prometheus Metrics (if enabled): http://127.0.0.1:8000/metrics
+Prometheus Metrics: http://127.0.0.1:8000/metrics
 
-Feature Importance (if available): http://127.0.0.1:8000/model/feature_importance
+Feature Importance: http://127.0.0.1:8000/model/feature_importance
 
 
 ### Makefile Shortcuts
@@ -104,7 +104,7 @@ MODEL_VERSION=1.0.0
 ### Static Frontend
 Simple static HTML page is in `static/index.html` (served if you put behind a web server or mount). For local dev you can open it and point fetch calls to the API origin if different.
 
-## Next.js Frontend (Optional)
+## Next.js Frontend
 
 A React/Next.js client lives in `frontend/`.
 
