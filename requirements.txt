@@ -1,15 +1,18 @@
+# Core ML and API dependencies
 pandas
 numpy
 scikit-learn
-xgboost
 joblib
-streamlit
-beautifulsoup4
-selenium
-python-dateutil
 fastapi
 uvicorn
 gunicorn
 prometheus-client
 python-dotenv
 pydantic-settings
+
+# Optional: Only include if needed for production
+# streamlit
+# beautifulsoup4
+# selenium
+# python-dateutil
+# xgboost

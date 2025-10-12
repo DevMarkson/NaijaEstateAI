@@ -1,0 +1,11 @@
+# Production requirements - lightweight for Heroku
+pandas
+numpy
+scikit-learn
+joblib
+fastapi
+uvicorn
+gunicorn
+prometheus-client
+python-dotenv
+pydantic-settings

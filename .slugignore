@@ -1,0 +1,18 @@
+# Exclude unnecessary files from Heroku slug
+
+_.ipynb
+_.csv
+static/
+frontend/
+tests/
+.venv/
+**pycache**/
+_.pyc
+_.pyo
+\*.pyd
+.pytest_cache/
+.coverage
+.env.example
+README.md
+Makefile
+heroku-setup.py
