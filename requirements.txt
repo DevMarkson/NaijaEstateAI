@@ -9,6 +9,7 @@ selenium
 python-dateutil
 fastapi
 uvicorn
+gunicorn
 prometheus-client
 python-dotenv
 pydantic-settings
