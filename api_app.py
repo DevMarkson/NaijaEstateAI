@@ -85,7 +85,7 @@ def load_model():
             try:
                 print("Model not found. Training model automatically...")
                 result = subprocess.run([
-                    sys.executable, "train_lite.py"
+                    sys.executable, "train.py", "--data", "lagos-rent.csv"
                 ], capture_output=True, text=True, cwd=Path.cwd())
 
                 if result.returncode != 0:

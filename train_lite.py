@@ -88,13 +88,14 @@ def memory_efficient_load_and_clean(data_path: str) -> pd.DataFrame:
                     return None
                 # Convert to string and remove quotes, commas, '/year', etc.
                 price_clean = str(price_str).replace('"', '').replace(',', '')
-                price_clean = price_clean.replace('/year', '').replace('/month', '')
+                price_clean = price_clean.replace(
+                    '/year', '').replace('/month', '')
                 price_clean = price_clean.strip()
                 try:
                     return float(price_clean)
                 except:
                     return None
-            
+
             df['price_ngn'] = df['price_ngn'].apply(clean_price)
 
         # Convert numeric features - handle formats like "4 beds", "3 baths"
@@ -107,7 +108,7 @@ def memory_efficient_load_and_clean(data_path: str) -> pd.DataFrame:
                     import re
                     match = re.search(r'(\d+)', str(val))
                     return int(match.group(1)) if match else 0
-                
+
                 df[col] = df[col].apply(extract_number).astype('int8')
 
         # Convert boolean features
@@ -141,10 +142,10 @@ def memory_efficient_load_and_clean(data_path: str) -> pd.DataFrame:
         df = df.dropna(subset=['price_ngn'])
 
         # Remove reasonable outliers (not too aggressive)
-        q5 = df['price_ngn'].quantile(0.05)  
+        q5 = df['price_ngn'].quantile(0.05)
         q95 = df['price_ngn'].quantile(0.95)
         df = df[(df['price_ngn'] >= q5) & (df['price_ngn'] <= q95)]
-        
+
         # Also remove obviously wrong values
         df = df[df['price_ngn'] > 100000]  # At least 100k Naira
         df = df[df['price_ngn'] < 100000000]  # Less than 100M Naira
@@ -152,11 +153,12 @@ def memory_efficient_load_and_clean(data_path: str) -> pd.DataFrame:
         # Keep only needed columns
         final_cols = FEATURE_COLUMNS + [TARGET_COLUMN]
         df = df[final_cols]
-        
+
         # Debug: Show some statistics
         print(f"After cleaning: {len(df)} rows, columns: {list(df.columns)}")
         if len(df) > 0:
-            print(f"Price range: {df['price_ngn'].min():,.0f} - {df['price_ngn'].max():,.0f} NGN")
+            print(
+                f"Price range: {df['price_ngn'].min():,.0f} - {df['price_ngn'].max():,.0f} NGN")
             print(f"Price mean: {df['price_ngn'].mean():,.0f} NGN")
             print(f"Sample prices: {df['price_ngn'].head().tolist()}")
 
