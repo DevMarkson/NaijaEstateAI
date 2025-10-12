@@ -16,6 +16,8 @@ from pydantic import BaseModel, Field
 import joblib
 import json
 import pandas as pd
+import subprocess
+import sys
 
 from config import BEST_MODEL_PATH, METRICS_PATH, FEATURE_COLUMNS
 from settings import settings
@@ -70,7 +72,27 @@ def load_model():
     global _model
     if _model is None:
         if not BEST_MODEL_PATH.exists():
-            raise FileNotFoundError("Model not trained. Run train.py first.")
+            # Create necessary directories
+            BEST_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+            METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Try to train the model automatically
+            try:
+                print("Model not found. Training model automatically...")
+                result = subprocess.run([
+                    sys.executable, "train.py", "--data", "lagos-rent.csv"
+                ], capture_output=True, text=True, cwd=Path.cwd())
+                
+                if result.returncode != 0:
+                    print(f"Training failed: {result.stderr}")
+                    raise FileNotFoundError("Model not trained and auto-training failed.")
+                
+                print("Model training completed successfully!")
+                
+            except Exception as e:
+                print(f"Auto-training error: {e}")
+                raise FileNotFoundError("Model not trained. Run train.py first.")
+        
         _model = joblib.load(BEST_MODEL_PATH)
     return _model
 
