@@ -37,11 +37,14 @@ app.add_middleware(
 )
 
 # Metrics
-REQUEST_COUNT = Counter("naijaestateai_requests_total", "Total API requests", ["endpoint", "method", "status"])
-REQUEST_LATENCY = Histogram("naijaestateai_request_latency_seconds", "Request latency", ["endpoint", "method"])
+REQUEST_COUNT = Counter("naijaestateai_requests_total", "Total API requests", [
+                        "endpoint", "method", "status"])
+REQUEST_LATENCY = Histogram(
+    "naijaestateai_request_latency_seconds", "Request latency", ["endpoint", "method"])
 
 _model = None
 _metrics_cache = None
+
 
 class PredictRequest(BaseModel):
     bedrooms: int = Field(ge=0, le=20)
@@ -54,10 +57,12 @@ class PredictRequest(BaseModel):
     City: str
     Neighborhood: str
 
+
 class PredictResponse(BaseModel):
     prediction: float
     rounded: int
     currency: str = "NGN"
+
 
 class ModelInfo(BaseModel):
     best: Optional[str]
@@ -75,24 +80,26 @@ def load_model():
             # Create necessary directories
             BEST_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
             METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Try to train the model automatically
             try:
                 print("Model not found. Training model automatically...")
                 result = subprocess.run([
-                    sys.executable, "train.py", "--data", "lagos-rent.csv"
+                    sys.executable, "train_lite.py"
                 ], capture_output=True, text=True, cwd=Path.cwd())
-                
+
                 if result.returncode != 0:
                     print(f"Training failed: {result.stderr}")
-                    raise FileNotFoundError("Model not trained and auto-training failed.")
-                
+                    raise FileNotFoundError(
+                        "Model not trained and auto-training failed.")
+
                 print("Model training completed successfully!")
-                
+
             except Exception as e:
                 print(f"Auto-training error: {e}")
-                raise FileNotFoundError("Model not trained. Run train.py first.")
-        
+                raise FileNotFoundError(
+                    "Model not trained. Run train.py first.")
+
         _model = joblib.load(BEST_MODEL_PATH)
     return _model
 
@@ -103,9 +110,11 @@ def load_metrics():
         _metrics_cache = json.loads(METRICS_PATH.read_text())
     return _metrics_cache or {}
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 @app.get("/model/info", response_model=ModelInfo)
 def model_info():
@@ -123,7 +132,8 @@ def model_info():
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
     model = load_model()
-    data = pd.DataFrame([{f: getattr(req, f if f != 'Newly Built' else 'Newly_Built') if f != 'Newly Built' else req.Newly_Built for f in FEATURE_COLUMNS}])
+    data = pd.DataFrame([{f: getattr(req, f if f != 'Newly Built' else 'Newly_Built')
+                        if f != 'Newly Built' else req.Newly_Built for f in FEATURE_COLUMNS}])
     # Ensure New Feature column naming consistent
     if 'Newly Built' in FEATURE_COLUMNS and 'Newly Built' not in data.columns:
         data['Newly Built'] = req.Newly_Built
@@ -145,5 +155,6 @@ def metrics():
 def feature_importance():
     fi_path = Path("artifacts/feature_importance.json")
     if not fi_path.exists():
-        raise HTTPException(status_code=404, detail="Feature importance not computed")
+        raise HTTPException(
+            status_code=404, detail="Feature importance not computed")
     return json.loads(fi_path.read_text())
