@@ -51,8 +51,20 @@ def minimal_train():
     print("Loading data...")
     try:
         data = pd.read_csv("lagos-rent.csv", 
-                          usecols=['Price', 'Bedrooms', 'Bathrooms', 'Neighborhood', 'Title'],
-                          dtype={'Bedrooms': 'float32', 'Bathrooms': 'float32'})
+                          usecols=['Price', 'Bedrooms', 'Bathrooms', 'Neighborhood', 'Title'])
+        
+        # Clean numeric columns
+        def extract_number(val):
+            if pd.isna(val):
+                return np.nan
+            # Extract first number from string like "4 beds" -> 4
+            import re
+            match = re.search(r'(\d+)', str(val))
+            return float(match.group(1)) if match else np.nan
+        
+        data['Bedrooms'] = data['Bedrooms'].apply(extract_number).astype('float32')
+        data['Bathrooms'] = data['Bathrooms'].apply(extract_number).astype('float32')
+        
     except Exception as e:
         print(f"Error loading data: {e}")
         return False
