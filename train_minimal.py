@@ -51,7 +51,7 @@ def minimal_train():
     print("Loading data...")
     try:
         data = pd.read_csv("lagos-rent.csv", 
-                          usecols=['Price', 'Bedrooms', 'Bathrooms', 'Location', 'Property Type'],
+                          usecols=['Price', 'Bedrooms', 'Bathrooms', 'Neighborhood', 'Title'],
                           dtype={'Bedrooms': 'float32', 'Bathrooms': 'float32'})
     except Exception as e:
         print(f"Error loading data: {e}")
@@ -77,14 +77,14 @@ def minimal_train():
     # Create simplified dummy variables
     print("Creating features...")
     
-    # Simplified location encoding (only top locations)
-    top_locations = data['Location'].value_counts().head(5).index
+    # Simplified location encoding (only top neighborhoods)
+    top_locations = data['Neighborhood'].value_counts().head(5).index
     for loc in top_locations:
-        data[f'Location_{loc}'] = (data['Location'] == loc).astype('float32')
+        data[f'Location_{loc}'] = (data['Neighborhood'] == loc).astype('float32')
     
-    # Simplified property type encoding
-    data['IsApartment'] = data['Property Type'].str.contains('Apartment|apartment', na=False).astype('float32')
-    data['IsHouse'] = data['Property Type'].str.contains('House|house|Duplex|duplex', na=False).astype('float32')
+    # Simplified property type encoding from Title
+    data['IsApartment'] = data['Title'].str.contains('Apartment|apartment', na=False).astype('float32')
+    data['IsHouse'] = data['Title'].str.contains('House|house|Duplex|duplex', na=False).astype('float32')
     
     # Select minimal feature set
     feature_cols = ['Bedrooms', 'Bathrooms', 'IsApartment', 'IsHouse'] + [f'Location_{loc}' for loc in top_locations]
