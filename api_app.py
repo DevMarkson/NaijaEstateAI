@@ -18,6 +18,8 @@ import json
 import pandas as pd
 import subprocess
 import sys
+import gc
+import os
 
 from config import BEST_MODEL_PATH, METRICS_PATH, FEATURE_COLUMNS
 from settings import settings
@@ -81,11 +83,12 @@ def load_model():
             BEST_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
             METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-            # Try to train the model automatically
+            # Try to train the model automatically with memory optimization
             try:
                 print("Model not found. Training model automatically...")
+                # Use train_lite.py to avoid memory issues during auto-training
                 result = subprocess.run([
-                    sys.executable, "train.py", "--data", "lagos-rent.csv"
+                    sys.executable, "train_lite.py"
                 ], capture_output=True, text=True, cwd=Path.cwd())
 
                 if result.returncode != 0:
@@ -100,7 +103,31 @@ def load_model():
                 raise FileNotFoundError(
                     "Model not trained. Run train.py first.")
 
-        _model = joblib.load(BEST_MODEL_PATH)
+        try:
+            # Force garbage collection before loading model
+            gc.collect()
+            
+            # Check available memory if possible
+            try:
+                import psutil
+                memory_info = psutil.virtual_memory()
+                print(f"Available memory: {memory_info.available / 1024 / 1024:.1f} MB")
+            except ImportError:
+                print("psutil not available, cannot check memory")
+            
+            _model = joblib.load(BEST_MODEL_PATH)
+            print(f"Model loaded successfully. Type: {type(_model)}")
+            
+            # Force garbage collection after loading
+            gc.collect()
+            
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            # If model loading fails, clear the global variable to prevent issues
+            _model = None
+            # Force cleanup
+            gc.collect()
+            raise FileNotFoundError("Model file corrupted or incompatible.")
     return _model
 
 
@@ -131,17 +158,46 @@ def model_info():
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
-    model = load_model()
-    data = pd.DataFrame([{f: getattr(req, f if f != 'Newly Built' else 'Newly_Built')
-                        if f != 'Newly Built' else req.Newly_Built for f in FEATURE_COLUMNS}])
-    # Ensure New Feature column naming consistent
-    if 'Newly Built' in FEATURE_COLUMNS and 'Newly Built' not in data.columns:
-        data['Newly Built'] = req.Newly_Built
+    """Memory-efficient prediction that manages memory carefully."""
+    start_time = time.time()
+    
     try:
+        # Force garbage collection before loading
+        gc.collect()
+        
+        # Load model on demand (don't cache it permanently for memory efficiency)
+        if not BEST_MODEL_PATH.exists():
+            raise HTTPException(status_code=503, detail="Model not available")
+        
+        # Load model temporarily
+        model = joblib.load(BEST_MODEL_PATH)
+        print(f"Model loaded for prediction. Type: {type(model)}")
+        
+        # Make prediction
+        data = pd.DataFrame([{f: getattr(req, f if f != 'Newly Built' else 'Newly_Built')
+                            if f != 'Newly Built' else req.Newly_Built for f in FEATURE_COLUMNS}])
+        
+        # Ensure consistent feature naming
+        if 'Newly Built' in FEATURE_COLUMNS and 'Newly Built' not in data.columns:
+            data['Newly Built'] = req.Newly_Built
+        
+        # Make prediction
         pred = float(model.predict(data)[0])
+        
+        # Clean up model from memory immediately after use
+        del model
+        gc.collect()
+        
+        # Record metrics
+        REQUEST_COUNT.labels(endpoint="predict").inc()
+        PREDICTION_TIME.observe(time.time() - start_time)
+        
+        return PredictResponse(prediction=pred, rounded=int(max(0, round(pred))), currency="NGN")
+        
     except Exception as e:
+        # Clean up on error
+        gc.collect()
         raise HTTPException(status_code=400, detail=f"Prediction failed: {e}")
-    return PredictResponse(prediction=pred, rounded=int(max(0, round(pred))), currency="NGN")
 
 
 @app.get("/metrics")

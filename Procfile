@@ -1,2 +1,2 @@
-release: python train.py --data lagos-rent.csv
-web: gunicorn -k uvicorn.workers.UvicornWorker api_app:app --bind 0.0.0.0:$PORT
+release: python train_minimal.py
+web: gunicorn -k uvicorn.workers.UvicornWorker api_app:app --bind 0.0.0.0:$PORT --max-requests 100 --max-requests-jitter 25 --timeout 60 --worker-class uvicorn.workers.UvicornWorker --workers 1
