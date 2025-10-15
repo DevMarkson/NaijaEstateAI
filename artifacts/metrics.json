@@ -1,51 +1,7 @@
 {
-  "best": "RandomForest",
-  "results": {
-    "LinearRegression": {
-      "rmse": 2861826.0347433896,
-      "mae": 1329231.3547901392,
-      "r2": 0.5906143018758208,
-      "mape": 0.46839645677716346,
-      "cv": {
-        "rmse_mean": null,
-        "rmse_std": null,
-        "mae_mean": null,
-        "mae_std": null,
-        "r2_mean": null,
-        "r2_std": null,
-        "mape_mean": null,
-        "mape_std": null
-      }
-    },
-    "RandomForest": {
-      "rmse": 2736020.1783661116,
-      "mae": 1246843.1155320115,
-      "r2": 0.6258163577194867,
-      "mape": 0.4134296471104704,
-      "cv": {
-        "rmse_mean": null,
-        "rmse_std": null,
-        "mae_mean": null,
-        "mae_std": null,
-        "r2_mean": null,
-        "r2_std": null,
-        "mape_mean": null,
-        "mape_std": null
-      }
-    }
-  },
-  "baseline": {
-    "rmse": 3158010.590999381,
-    "mae": 1654918.8812785388,
-    "r2": 0.5014905787732838,
-    "mape": 0.7521174508192999
-  },
-  "rows": 7884,
-  "removed_outliers": 116,
-  "price_bounds": {
-    "min_kept": 100000,
-    "p99_kept": 36000000.0
-  },
-  "test_size": 0.25,
-  "target_transform": "log1p"
+  "model_name": "LinearRegression",
+  "rmse": 1724324.7554627762,
+  "mae": 1079521.2441647805,
+  "r2": 0.6960547164284572,
+  "mape": 48.18578227955694
 }
